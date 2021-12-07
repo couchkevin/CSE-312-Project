@@ -10,7 +10,7 @@ import myparser
 myclient = pymongo.MongoClient(port=27017)
 #myclient = pymongo.MongoClient("mongo")
 
-def create_account(username,password,connection):
+def create_account(username,password,connection): #returns -1 on failure of acc creation, 1 on success
     mydb = myclient["mydatabase"]
     usercol = mydb['users']
 
@@ -19,34 +19,34 @@ def create_account(username,password,connection):
         if x['username'] == username:
             #error username already used
             replies.sendmsg('403 Forbidden', "Not allowed, username is taken.", connection)
-            return
+            return -1
     #if user name wasnt found continue
 
     #password requirements
     if len(password) < 8:
         #error
         replies.sendmsg("404 Not Found", "Creation unsuccessful, password too short", connection)
-        return
+        return -1
     elif not any(x.isupper() for x in password):
         #error
         replies.sendmsg("404 Not Found", "Creation unsuccessful, password has no uppercase", connection)
-        return
+        return -1
     elif not any(x.islower() for x in password):
         #error
         replies.sendmsg("404 Not Found", "Creation unsuccessful, password has no lowercase", connection)
-        return
+        return -1
     elif not any(x.isdigit() for x in password):
         #error
         replies.sendmsg("404 Not Found", "Creation unsuccessful, password has no numbers", connection)
-        return
+        return -1
     elif password.isalnum():
         #error
         replies.sendmsg("404 Not Found", "Creation unsuccessful, password has no special characters", connection)
-        return
+        return -1
     elif len(password) > 32:
         #error
         replies.sendmsg("404 Not Found", "Creation unsuccessful, password too long", connection)
-        return
+        return -1
 
     salt = bcrypt.gensalt().decode('utf-8')
     password = (password+salt).encode('utf-8')
@@ -57,6 +57,7 @@ def create_account(username,password,connection):
 
     #refresh page
     replies.sendmsg("301 Moved Permanently", "/", connection)
+    return 1
 
 
 def login(username,password,connection):
@@ -107,8 +108,6 @@ def login(username,password,connection):
         reply2 += "\r\n"
         reply2 += "Login successful"
         connection.request.sendall(bytes(reply2, 'utf-8'))
-
-
 
 
     else:
@@ -183,3 +182,8 @@ def checkvalid(data,self):
             print("False :(")
             return False
 
+def addPFP(username,path):
+    mydb = myclient["mydatabase"]
+    users = mydb['users']
+    users.find_one_and_update({"username": username},
+                                 {"$set": {"PFP": path}})

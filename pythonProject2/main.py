@@ -23,7 +23,6 @@ class server(socketserver.BaseRequestHandler):
         #### GET FUNCTIONS ####
         if datatype == 'Get':
             data = dataraw.decode("utf-8") #since it's a get request we know it's just headers
-
             split1  = data.split("\r") #divide up
             split2  = split1[0].split(" ")
             path    = split2[1]
@@ -58,15 +57,27 @@ class server(socketserver.BaseRequestHandler):
             elif (path == '/functions.js') :
                 replies.sendmsg("Base3", "Base3", self)
 
+            elif (path[0:17] == '/profilepictures/'):
+                with open(path[1:], "rb") as file:
+                    data = file.read()
+
+                response = "HTTP/1.1 200 OK\r\nContent-Type: image/" + path[-3:] + "\r\nX-Content-Type-Options: nosniff\r\nContent-Length: " + str(len(data)) + "\r\n\r\n"
+                self.request.sendall(response.encode() + data)
         ### POST FUNCTIONS #####
         elif datatype == 'Post':
             pathindex = dataraw.find(b'/')  # find first / for the path
             postpath = myparser.findtill(dataraw, "/", 32)  # custom function to find / after pathindex up until 32
 
             if (postpath == 'create-account') :
-                username = myparser.findbufferend(dataraw, b'name="Username"\r\n\r\n', b'\r\n-').decode('utf-8')
-                password = myparser.findbufferend(dataraw, b'name="Password"\r\n\r\n', b'\r\n-').decode('utf-8')
-                auth.create_account(username, password, self)
+                length = int(myparser.findbufferend(dataraw,b'Content-Length: ', b'\r\n').decode('utf-8'))
+                boundary = b'--' + myparser.findbufferend(dataraw, b'boundary=', b'\r\n')
+                if (dataraw.endswith(boundary+b'--\r\n')): #all data exists in current buffer, dont have to read more
+                    username = myparser.findbufferend(dataraw, b'name="Username"\r\n\r\n', b'\r\n-').decode('utf-8')
+                    password = myparser.findbufferend(dataraw, b'name="Password"\r\n\r\n', b'\r\n-').decode('utf-8')
+                    if auth.create_account(username, password, self) == 1: #create acc with default pfp
+                        auth.addPFP(username,"profilepictures/defaultPFP.png")
+                else: #user uploaded pfp or user/pass exceeded current buffer, have to read more data
+                    myparser.buildPFP(length,boundary,self)
 
             if (postpath == 'login') :
                 username = myparser.findbufferend(dataraw, b'name="Username"\r\n\r\n', b'\r\n-').decode('utf-8')

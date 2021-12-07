@@ -30,7 +30,7 @@ function sendMessage() {
 function addMessage(message) {
    const chatMessage = JSON.parse(message.data);
    let chat = document.getElementById('chat');
-   chat.innerHTML += "<b>" + chatMessage['username'] + "</b>: " + chatMessage["comment"] + "<br/>";
+   chat.innerHTML += "<img src= \"/../" + chatMessage['pfp'] +"\"width=\"50\" height=\"50\"/> <b>" + chatMessage['username'] + "</b>: " + chatMessage["comment"] + "<br/>";
 }
 
 

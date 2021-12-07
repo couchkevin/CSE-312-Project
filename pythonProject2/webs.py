@@ -152,6 +152,9 @@ def readsock(maindata,username):
 
         #add username here
         retdata = retdata.replace("}",(",\"username\":\""+username+"\"}"))
+        #add pfp here
+        pfp = mydb["users"].find_one({"username" : username })["PFP"]
+        retdata = retdata.replace("}",(",\"pfp\":\""+pfp+"\"}"))
 
         retdata2 = retdata
         retdata = retdata.replace("}", ",\"type\":\"1\"}") #add type 1 to show that it will be used for chat msg and not usernames
@@ -178,20 +181,18 @@ def readsock(maindata,username):
         mydict = {"value": retdata2}
 
         #only adds messege to database if there isn't a requested user
-        if not user:
+        if user == -1:
             mycol.insert_one(mydict) #send our msg to the database
-
 
         #if we didnt find 'user' then print all
         #else print just to the two users
-        if not user:
+        if user == -1:
             for x in globe.clients:
                 x[0].request.sendall(bytes(reply))
         else:
             #checks to see if user exists, if it does it sends
             for x in globe.clients:
                 if x[1] == user:
-                    print(x)
                     x[0].request.sendall(bytes(reply))
                     maindata.request.sendall(bytes(reply))
 
