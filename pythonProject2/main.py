@@ -57,6 +57,9 @@ class server(socketserver.BaseRequestHandler):
             elif (path == '/functions.js') :
                 replies.sendmsg("Base3", "Base3", self)
 
+            elif (path == '/login_style.css') :
+                replies.sendmsg("Base4","Base4",self)
+                
             elif (path[0:17] == '/profilepictures/'):
                 with open(path[1:], "rb") as file:
                     data = file.read()
