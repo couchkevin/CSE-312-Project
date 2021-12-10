@@ -10,8 +10,8 @@ import pymongo
 from itertools import islice
 
 
-myclient = pymongo.MongoClient(port=27017)
-#myclient = pymongo.MongoClient("mongo")
+#myclient = pymongo.MongoClient(port=27017)
+myclient = pymongo.MongoClient("mongo")
 
 def hands(data,connection):
 

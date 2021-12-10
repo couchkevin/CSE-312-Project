@@ -6,11 +6,13 @@ import auth
 
 import replies
 import webs
+import websocket2
 
 
 class server(socketserver.BaseRequestHandler):
     def handle(self):
         dataraw = self.request.recv(2048)
+        print(dataraw);
 
 
         #check what sort of data we've received
@@ -66,6 +68,34 @@ class server(socketserver.BaseRequestHandler):
 
                 response = "HTTP/1.1 200 OK\r\nContent-Type: image/" + path[-3:] + "\r\nX-Content-Type-Options: nosniff\r\nContent-Length: " + str(len(data)) + "\r\n\r\n"
                 self.request.sendall(response.encode() + data)
+
+                ###############################
+                # cookie clicker will be below!!
+            elif (path == "/cookie"):  # check if they're logged in first
+                if (auth.checkvalid(data, self) == True) :  # if its a real token
+                    replies.sendmsg("200 OK", "Base2.5", self)
+                    return
+                else :
+                    replies.sendmsg('403 Forbidden', "Not allowed, wrong token. User must log in to view page", self)
+            elif (path == '/websocket2') :
+                if (auth.checkvalid(data, self) == True) :
+                    webs.hands(data, self)
+                    globe.cookieclients.append(self)
+                    websocket2.liveupdate(self)
+
+
+
+
+            elif (path == '/functions.js') :
+                replies.sendmsg("Base3", "Base3", self)
+            elif (path == '/functionscookie.js') :
+                replies.sendmsg("Base5", "Base5", self)
+
+            else :  # we check for image requests in here
+                path2 = path.split('/')
+                if (path2[1] == 'image') :  # if first part is an image
+                    replies.sendmsg("image", path, self)
+
         ### POST FUNCTIONS #####
         elif datatype == 'Post':
             pathindex = dataraw.find(b'/')  # find first / for the path
