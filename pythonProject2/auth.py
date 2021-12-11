@@ -7,8 +7,8 @@ import bcrypt
 
 import myparser
 
-#myclient = pymongo.MongoClient(port=27017)
 myclient = pymongo.MongoClient("mongo")
+#myclient = pymongo.MongoClient(port=27017)
 
 def create_account(username,password,connection): #returns -1 on failure of acc creation, 1 on success
     mydb = myclient["mydatabase"]

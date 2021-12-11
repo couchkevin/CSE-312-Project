@@ -10,7 +10,6 @@ import pymongo
 from itertools import islice
 
 
-#myclient = pymongo.MongoClient(port=27017)
 myclient = pymongo.MongoClient("mongo")
 
 def hands(data,connection):
@@ -63,7 +62,8 @@ def readsock(maindata,username):
     #this will loop and keep open so we can continually read data from the websocket!
 
     #first access mongo database and grab all the messages
-
+    print(maindata)
+    print(username)
     mydb = myclient["mydatabase"]
     mycol = mydb["chatters"]
 
@@ -186,6 +186,10 @@ def readsock(maindata,username):
 
         #if we didnt find 'user' then print all
         #else print just to the two users
+        print("RETDATA:")
+        print(retdata)
+        print("\n\n\nREPLY")
+        print(reply)
         if user == -1:
             for x in globe.clients:
                 x[0].request.sendall(bytes(reply))
@@ -193,6 +197,7 @@ def readsock(maindata,username):
             #checks to see if user exists, if it does it sends
             for x in globe.clients:
                 if x[1] == user:
+                    print(reply)
                     x[0].request.sendall(bytes(reply))
                     maindata.request.sendall(bytes(reply))
 

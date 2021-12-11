@@ -40,19 +40,25 @@ def build(data,boundary,index):
         return data[index:]
 
 def uploadPFP(PFP,username,imageType):
+    print(username)
+    username = username.replace('"', "") #clean up our file name and get it ready for our system
+    username = username.replace('/', "")
+    username = username.replace('~', "")
     filename = "profilepictures/" + username + "." + imageType
+
     with open(filename, "wb") as file:
         file.write(PFP)
     auth.addPFP(username,filename)
 
-def buildPFP(length,boundary,self):
-    data = self.request.recv(2048)
+def buildPFP(data,length,boundary,self):
+    username = findbufferend(data, b'name="Username"\r\n\r\n', b'\r\n-')
+    if(username == -1):
+        data = self.request.recv(2048)
     username = findbufferend(data, b'name="Username"\r\n\r\n', b'\r\n-').decode('utf-8')
     password = findbufferend(data, b'name="Password"\r\n\r\n', b'\r\n-').decode('utf-8')
     if auth.create_account(username,password,self) == 1: #valid signup build PFP
         imageType = findbufferend(data,b'Content-Type: image/', b'\r\n\r\n')
         if imageType!= -1:
-            imageType = findbufferend(data,b'Content-Type: image/', b'\r\n\r\n')
             startOfImage = b'Content-Type: image/' + imageType + b'\r\n\r\n'
             index = data.find(startOfImage) + len(startOfImage)
             PFP = build(data,boundary,index)

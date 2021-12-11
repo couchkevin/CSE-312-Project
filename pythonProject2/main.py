@@ -61,6 +61,9 @@ class server(socketserver.BaseRequestHandler):
 
             elif (path == '/login_style.css') :
                 replies.sendmsg("Base4","Base4",self)
+
+            elif (path == '/chatpage_style.css') :
+                replies.sendmsg("Base4.5","Base4.5",self)
                 
             elif (path[0:17] == '/profilepictures/'):
                 with open(path[1:], "rb") as file:
@@ -107,12 +110,16 @@ class server(socketserver.BaseRequestHandler):
                 if (dataraw.endswith(boundary+b'--\r\n')): #all data exists in current buffer, dont have to read more
                     username = myparser.findbufferend(dataraw, b'name="Username"\r\n\r\n', b'\r\n-').decode('utf-8')
                     password = myparser.findbufferend(dataraw, b'name="Password"\r\n\r\n', b'\r\n-').decode('utf-8')
+
                     if auth.create_account(username, password, self) == 1: #create acc with default pfp
                         auth.addPFP(username,"profilepictures/defaultPFP.png")
                 else: #user uploaded pfp or user/pass exceeded current buffer, have to read more data
-                    myparser.buildPFP(length,boundary,self)
+                    myparser.buildPFP(dataraw,length,boundary,self)
 
             if (postpath == 'login') :
+                username = myparser.findbufferend(dataraw, b'name="Username"\r\n\r\n', b'\r\n-')
+                if(username== -1):
+                    dataraw = self.request.recv(2048)
                 username = myparser.findbufferend(dataraw, b'name="Username"\r\n\r\n', b'\r\n-').decode('utf-8')
                 password = myparser.findbufferend(dataraw, b'name="Password"\r\n\r\n', b'\r\n-').decode('utf-8')
                 auth.login(username, password, self)

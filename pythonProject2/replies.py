@@ -112,6 +112,18 @@ def sendmsg(code, msg, conenction):
         reply2 += line
         reply2 += "\r\n"
         conenction.request.sendall(bytes(reply2, 'utf-8'))
+    elif msg == "Base4.5" :
+        reply2 = "HTTP/1.1 "
+        reply2 += code
+        reply2 += "\r\n"
+        reply2 += "Content-Type:text/css\r\n"
+        reply2 += "\r\n"
+        file = open("./html/chatpage_style.css")
+        line = file.read()#.replace("\n", " ")
+        file.close()
+        reply2 += line
+        reply2 += "\r\n"
+        conenction.request.sendall(bytes(reply2, 'utf-8'))
     elif msg == "Base5" :
         reply2 = "HTTP/1.1 "
         reply2 += code
